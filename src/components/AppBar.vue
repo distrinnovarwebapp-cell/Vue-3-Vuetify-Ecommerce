@@ -111,7 +111,7 @@ const goHome = () => {
     <v-app-bar-title class="cursor-pointer logo-container" @click="goHome">
       <div class="d-flex align-center text-primary">
         <v-icon icon="mdi-shopping-outline" size="28" class="mr-2 logo-icon" />
-        <span class="text-h6 font-weight-black tracking-wide">ShopVue</span>
+        <span class="text-h6 font-weight-black tracking-wide">DistrinnovarSoluciones</span>
       </div>
     </v-app-bar-title>
 
