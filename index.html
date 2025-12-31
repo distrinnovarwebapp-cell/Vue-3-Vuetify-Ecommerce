@@ -1,14 +1,71 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vue 3 Vuetify E-commerce</title>
- 
-</head> 
+    
+    <title>Cupcake Mania | Los Mejores Cupcakes y Postres en Cartagena</title>
+    <meta name="description" content="Endulza tus momentos con Cupcake Mania. Descubre nuestros cupcakes artesanales, tortas personalizadas y postres recién horneados en Cartagena. ¡Haz tu pedido online!" />
+    <meta name="keywords" content="cupcakes cartagena, postres artesanales, repostería cartagena, tortas personalizadas, dulces a domicilio" />
+    <meta name="author" content="Cupcake Mania" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Cupcake Mania | Repostería Artesanal en Cartagena" />
+    <meta property="og:description" content="Diseños únicos y sabores inolvidables. Haz tu pedido y recibe la magia del dulce en casa." />
+    <meta property="og:image" content="/og-image.jpg" /> <meta property="og:url" content="https://cupcakemania.co" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cupcake Mania | Cupcakes Artesanales" />
+    <meta name="twitter:description" content="Los dulces más famosos de Cartagena a un solo clic." />
+    <meta name="twitter:image" content="/og-image.jpg" />
+
+  
+
+    <style>
+      body { margin: 0; padding: 0; background-color: #fdf2f5; }
+      #app-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .loader-logo {
+        width: 100px;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+      .loader-text {
+        color: #d81b60;
+        margin-top: 20px;
+        font-weight: bold;
+        letter-spacing: 1px;
+      }
+      @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.8; }
+      }
+    </style>
+  </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div id="app-loading">
+        <img src="/logo-loading.png" alt="Cupcake Mania Logo" class="loader-logo" />
+        <div class="loader-text">HORNEANDO EXPERIENCIAS...</div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
+    
+    <noscript>
+      <div style="text-align: center; padding: 50px;">
+        <h1>¡Uy! Tu navegador tiene JavaScript desactivado.</h1>
+        <p>Para disfrutar de nuestras delicias, por favor activa JavaScript.</p>
+      </div>
+    </noscript>
   </body>
 </html>

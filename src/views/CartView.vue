@@ -8,136 +8,97 @@ const cartStore = useCartStore();
 
 const items = computed(() => cartStore.items);
 const subtotal = computed(() => cartStore.subtotal);
-const tax = computed(() => cartStore.tax);
 const total = computed(() => cartStore.total);
 
 const updateQuantity = (productId: number, newQuantity: number) => {
+  if (newQuantity < 1) return;
   cartStore.updateQuantity(productId, newQuantity);
 };
 
-const removeItem = (productId: number) => {
-  cartStore.removeFromCart(productId);
-};
-
-const clearCart = () => {
-  cartStore.clearCart();
-};
-
-const goToCatalog = () => {
-  router.push({ name: 'Catalog' });
-};
-
-const goToProduct = (id: number) => {
-  router.push({ name: 'ProductDetail', params: { id } });
-};
+const removeItem = (productId: number) => cartStore.removeFromCart(productId);
+const clearCart = () => cartStore.clearCart();
+const goToCatalog = () => router.push({ name: 'Catalog' });
+const goToProduct = (id: number) => router.push({ name: 'ProductDetail', params: { id } });
 
 const checkout = () => {
-  alert('Funcionalidad de checkout en desarrollo');
+  // Simulación de pedido vía WhatsApp (Muy común en negocios locales)
+  const message = items.value.map(i => `${i.quantity}x ${i.product.name}`).join(', ');
+  const whatsappUrl = `https://wa.me/573205358816?text=¡Hola! Quiero pedir: ${message}. Total: $${total.value.toLocaleString()}`;
+  window.open(whatsappUrl, '_blank');
 };
 </script>
 
 <template>
-  <v-container class="py-8">
-    <h1 class="text-h3 font-weight-bold mb-6">
-      <v-icon size="40" class="mr-2">mdi-cart</v-icon>
-      Mi Carrito
-    </h1>
+  <v-container class="py-8 py-md-12 px-4">
+    <div class="d-flex align-center mb-8">
+      <v-icon size="40" color="pink-accent-2" class="mr-4">mdi-basket-heart</v-icon>
+      <h1 class="text-h3 font-weight-black text-brown-darken-4">Mi Bolsa Dulce</h1>
+    </div>
 
     <v-row v-if="items.length > 0">
       <v-col cols="12" lg="8">
-        <v-card elevation="2">
-          <v-card-title class="d-flex justify-space-between align-center">
-            <span>Productos ({{ items.length }})</span>
+        <v-card variant="flat" class="rounded-xl border-sweet bg-white overflow-hidden">
+          <div class="pa-6 d-flex justify-space-between align-center bg-brown-lighten-5">
+            <span class="text-subtitle-1 font-weight-bold text-brown-darken-3">
+              {{ items.length }} {{ items.length === 1 ? 'delicia' : 'delicias' }} seleccionadas
+            </span>
             <v-btn
               variant="text"
-              color="error"
+              color="pink-darken-1"
               size="small"
+              class="text-none font-weight-bold"
+              prepend-icon="mdi-trash-can-outline"
               @click="clearCart"
             >
-              <v-icon class="mr-1">mdi-delete</v-icon>
-              Vaciar Carrito
+              Vaciar bolsa
             </v-btn>
-          </v-card-title>
+          </div>
 
           <v-divider></v-divider>
 
-          <v-list>
+          <v-list class="pa-0">
             <v-list-item
               v-for="(item, index) in items"
               :key="item.product.id"
-              class="cart-item py-4"
+              class="cart-item pa-4 pa-md-6"
             >
-              <template #prepend>
-                <v-avatar size="100" rounded="lg" class="mr-4 cursor-pointer" @click="goToProduct(item.product.id)">
-                  <v-img :src="item.product.image" cover></v-img>
-                </v-avatar>
-              </template>
+              <v-row align="center" no-gutters>
+                <v-col cols="4" sm="2">
+                  <v-avatar size="80" rounded="xl" class="cursor-pointer elevation-2" @click="goToProduct(item.product.id)">
+                    <v-img :src="item.product.image" cover></v-img>
+                  </v-avatar>
+                </v-col>
 
-              <v-list-item-title class="text-h6 mb-2 cursor-pointer" @click="goToProduct(item.product.id)">
-                {{ item.product.name }}
-              </v-list-item-title>
+                <v-col cols="8" sm="4" class="pl-4 pl-md-6">
+                  <h3 class="text-h6 font-weight-black text-brown-darken-4 mb-1 cursor-pointer" @click="goToProduct(item.product.id)">
+                    {{ item.product.name }}
+                  </h3>
+                  <v-chip size="x-small" color="pink-lighten-4" variant="flat" class="text-pink-darken-4 font-weight-bold">
+                    {{ item.product.category }}
+                  </v-chip>
+                </v-col>
 
-              <v-list-item-subtitle class="mb-2">
-                <v-chip size="small" variant="outlined">
-                  {{ item.product.brand }}
-                </v-chip>
-              </v-list-item-subtitle>
+                <v-col cols="7" sm="3" class="mt-4 mt-sm-0 d-flex justify-start justify-sm-center">
+                  <div class="qty-control d-flex align-center bg-grey-lighten-4 rounded-pill px-2">
+                    <v-btn icon="mdi-minus" size="x-small" variant="text" @click="updateQuantity(item.product.id, item.quantity - 1)"></v-btn>
+                    <span class="px-4 font-weight-bold">{{ item.quantity }}</span>
+                    <v-btn icon="mdi-plus" size="x-small" variant="text" :disabled="item.quantity >= item.product.stock" @click="updateQuantity(item.product.id, item.quantity + 1)"></v-btn>
+                  </div>
+                </v-col>
 
-              <div class="d-flex align-center mt-2">
-                <v-btn
-                  icon
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  @click="updateQuantity(item.product.id, item.quantity - 1)"
-                >
-                  <v-icon>mdi-minus</v-icon>
-                </v-btn>
-
-                <v-text-field
-                  :model-value="item.quantity"
-                  readonly
-                  variant="outlined"
-                  hide-details
-                  density="compact"
-                  class="mx-2"
-                  style="max-width: 60px;"
-                  centered
-                ></v-text-field>
-
-                <v-btn
-                  icon
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  :disabled="item.quantity >= item.product.stock"
-                  @click="updateQuantity(item.product.id, item.quantity + 1)"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-
-                <v-spacer></v-spacer>
-
-                <div class="text-right">
-                  <p class="text-h6 font-weight-bold text-primary mb-0">
-                    ${{ (item.product.price * item.quantity).toFixed(2) }}
+                <v-col cols="5" sm="3" class="mt-4 mt-sm-0 text-right">
+                  <p class="text-h6 font-weight-black text-brown-darken-4 mb-0">
+                    ${{ (item.product.price * item.quantity).toLocaleString() }}
                   </p>
-                  <p class="text-caption text-grey">
-                    ${{ item.product.price.toFixed(2) }} c/u
-                  </p>
-                </div>
-
-                <v-btn
-                  icon
-                  variant="text"
-                  color="error"
-                  class="ml-2"
-                  @click="removeItem(item.product.id)"
-                >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </div>
-
+                  <v-btn
+                    icon="mdi-close-circle-outline"
+                    variant="text"
+                    color="grey-lighten-1"
+                    size="small"
+                    @click="removeItem(item.product.id)"
+                  ></v-btn>
+                </v-col>
+              </v-row>
               <v-divider v-if="index < items.length - 1" class="mt-4"></v-divider>
             </v-list-item>
           </v-list>
@@ -145,154 +106,108 @@ const checkout = () => {
       </v-col>
 
       <v-col cols="12" lg="4">
-        <v-card elevation="4" class="sticky-summary">
-          <v-card-title class="text-h5 font-weight-bold">
-            Resumen de Compra
-          </v-card-title>
+        <v-card class="rounded-xl pa-6 sticky-summary elevation-4" color="brown-darken-4" theme="dark">
+          <h2 class="text-h5 font-weight-black mb-6">Resumen del Pedido</h2>
+          
+          <div class="d-flex justify-space-between mb-4">
+            <span class="text-brown-lighten-3">Subtotal delicias</span>
+            <span class="text-h6">${{ subtotal.toLocaleString() }}</span>
+          </div>
+          
+          <div class="d-flex justify-space-between mb-4 align-center">
+            <span class="text-brown-lighten-3">Envío (Cartagena)</span>
+            <v-chip v-if="subtotal >= 50000" size="small" color="success" variant="flat">GRATIS</v-chip>
+            <span v-else class="text-h6 text-pink-lighten-3">$5.000</span>
+          </div>
 
-          <v-divider></v-divider>
+          <v-divider class="my-6 border-opacity-25"></v-divider>
 
-          <v-card-text>
-            <v-list bg-color="transparent">
-              <v-list-item>
-                <template #prepend>
-                  <span class="text-body-1">Subtotal:</span>
-                </template>
-                <template #append>
-                  <span class="text-h6 font-weight-bold">
-                    ${{ subtotal.toFixed(2) }}
-                  </span>
-                </template>
-              </v-list-item>
+          <div class="d-flex justify-space-between mb-8 align-center">
+            <span class="text-h6">Total</span>
+            <span class="text-h4 font-weight-black text-pink-accent-2">
+              ${{ (subtotal >= 50000 ? subtotal : subtotal + 5000).toLocaleString() }}
+            </span>
+          </div>
 
-              <v-list-item>
-                <template #prepend>
-                  <span class="text-body-1">Impuestos (16%):</span>
-                </template>
-                <template #append>
-                  <span class="text-h6 font-weight-bold">
-                    ${{ tax.toFixed(2) }}
-                  </span>
-                </template>
-              </v-list-item>
+          <v-btn
+            block
+            color="pink-accent-2"
+            size="x-large"
+            class="rounded-pill font-weight-black text-none mb-4"
+            elevation="8"
+            @click="checkout"
+          >
+            Confirmar Pedido
+            <v-icon end>mdi-whatsapp</v-icon>
+          </v-btn>
 
-              <v-divider class="my-2"></v-divider>
+          <v-btn
+            block
+            variant="text"
+            color="white"
+            class="text-none"
+            @click="goToCatalog"
+          >
+            Seguir antojándome
+          </v-btn>
 
-              <v-list-item>
-                <template #prepend>
-                  <span class="text-h6 font-weight-bold">Total:</span>
-                </template>
-                <template #append>
-                  <span class="text-h5 font-weight-bold text-primary">
-                    ${{ total.toFixed(2) }}
-                  </span>
-                </template>
-              </v-list-item>
-            </v-list>
-
-            <v-alert
-              v-if="subtotal >= 100"
-              type="success"
-              variant="tonal"
-              density="compact"
-              class="mt-4"
-            >
-              <v-icon start>mdi-truck-fast</v-icon>
-              ¡Envío gratis!
-            </v-alert>
-
-            <v-alert
-              v-else
-              type="info"
-              variant="tonal"
-              density="compact"
-              class="mt-4"
-            >
-              Añade ${{ (100 - subtotal).toFixed(2) }} más para envío gratis
-            </v-alert>
-
-            <v-btn
-              size="x-large"
-              color="success"
-              block
-              elevation="4"
-              class="mt-4"
-              @click="checkout"
-            >
-              <v-icon class="mr-2">mdi-lock</v-icon>
-              Proceder al Pago
-            </v-btn>
-
-            <v-btn
-              variant="outlined"
-              color="primary"
-              block
-              class="mt-2"
-              @click="goToCatalog"
-            >
-              <v-icon class="mr-2">mdi-arrow-left</v-icon>
-              Seguir Comprando
-            </v-btn>
-          </v-card-text>
-
-          <v-divider></v-divider>
-
-          <v-card-text>
-            <div class="text-center">
-              <v-icon color="success" class="mr-2">mdi-shield-check</v-icon>
-              <span class="text-caption">Compra 100% segura</span>
-            </div>
-          </v-card-text>
+          <div class="mt-6 pa-4 bg-brown-darken-3 rounded-lg text-center">
+            <v-icon size="small" color="pink-accent-2" class="mr-2">mdi-shield-check</v-icon>
+            <span class="text-caption">Pago seguro & ingredientes frescos</span>
+          </div>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-row v-else>
-      <v-col cols="12">
-        <v-card elevation="2" class="text-center py-12">
-          <v-icon size="120" color="grey-lighten-1">
-            mdi-cart-off
-          </v-icon>
-          <h2 class="text-h4 font-weight-bold mt-4 mb-2">
-            Tu carrito está vacío
-          </h2>
-          <p class="text-body-1 text-grey mb-6">
-            Explora nuestro catálogo y encuentra productos increíbles
-          </p>
-          <v-btn
-            size="large"
-            color="primary"
-            elevation="4"
-            @click="goToCatalog"
-          >
-            <v-icon class="mr-2">mdi-shopping</v-icon>
-            Ir al Catálogo
-          </v-btn>
-        </v-card>
+    <v-row v-else justify="center">
+      <v-col cols="12" md="6" class="text-center py-12">
+        <v-icon size="120" color="pink-lighten-4" class="mb-6">mdi-cookie-off-outline</v-icon>
+        <h2 class="text-h4 font-weight-black text-brown-darken-4 mb-4">¿Bolsa vacía?</h2>
+        <p class="text-body-1 text-grey-darken-1 mb-8">
+          Aún no has añadido ninguna delicia a tu bolsa. ¡Nuestro horno está listo!
+        </p>
+        <v-btn
+          size="x-large"
+          color="pink-accent-2"
+          class="rounded-pill px-10 font-weight-bold text-none"
+          @click="goToCatalog"
+        >
+          Explorar Menú
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <style scoped>
+.border-sweet {
+  border: 2px solid #FCE4EC !important;
+}
+
 .cart-item {
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .cart-item:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #FFF9FB;
+}
+
+.qty-control {
+  border: 1px solid #E0E0E0;
 }
 
 .sticky-summary {
   position: sticky;
-  top: 80px;
+  top: 100px;
 }
 
 .cursor-pointer {
   cursor: pointer;
 }
 
-.cursor-pointer:hover {
-  opacity: 0.8;
+@media (max-width: 600px) {
+  .text-h3 {
+    font-size: 2rem !important;
+  }
 }
 </style>
