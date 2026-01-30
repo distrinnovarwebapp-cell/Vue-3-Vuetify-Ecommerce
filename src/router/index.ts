@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Cart',
     component: () => import('../views/CartView.vue'),
   },
+  {
+  path: '/historial',
+  name: 'OrderHistory',
+  component: () => import('../views/OrderHistoryView.vue')
+}
 ];
 
 const router = createRouter({
