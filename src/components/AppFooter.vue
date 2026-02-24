@@ -92,7 +92,7 @@ const socialHover = ref<string | null>(null);
               <v-avatar color="brown-darken-3" size="36" class="mr-3">
                 <v-icon size="small" color="pink-accent-2">mdi-whatsapp</v-icon>
               </v-avatar>
-              <span class="text-body-2">+57 300 123 4567</span>
+              <span class="text-body-2">+57 316 259 9891</span>
             </div>
 
             <div class="d-flex align-center text-brown-lighten-4 justify-center justify-md-start">

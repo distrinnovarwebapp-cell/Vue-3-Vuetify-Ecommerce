@@ -1,18 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { products } from '../data/mockProducts';
 import { useCartStore } from '../stores/cart';
+import { fetchProducts } from '../data/firestoreProducts';
+import type { Product } from '../types/product';
 
 // --- Configuración y Datos ---
 const router = useRouter();
 const cartStore = useCartStore();
 
+const products = ref<Product[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+
+onMounted(async () => {
+  try {
+    products.value = await fetchProducts();
+  } catch (err) {
+    error.value = 'No se pudieron cargar los productos.';
+  } finally {
+    loading.value = false;
+  }
+});
+
 // Filtramos productos destacados de Cupcake Mania
-const featuredProducts = computed(() => products.filter((p) => p.featured));
+const featuredProducts = computed(() => products.value.filter((p) => p.featured));
 
 // --- Métodos de Navegación y Acción ---
-const goToProduct = (id: number) => {
+const goToProduct = (id: string) => {
   router.push({ name: 'ProductDetail', params: { id } });
 };
 
@@ -20,8 +35,8 @@ const goToCatalog = () => {
   router.push({ name: 'Catalog' });
 };
 
-const addToCart = (productId: number) => {
-  const product = products.find((p) => p.id === productId);
+const addToCart = (productId: string) => {
+  const product = products.value.find((p) => p.id === productId);
   if (product) {
     cartStore.addToCart(product, 1);
   }
@@ -29,7 +44,7 @@ const addToCart = (productId: number) => {
 
 const openWhatsApp = () => {
   // Reemplaza con el número real de Cupcake Mania
-  window.open('https://wa.me/573205358816?text=Hola%20Cupcake%20Mania!%20Quiero%20hacer%20un%20pedido%20personalizado.', '_blank');
+  window.open('https://wa.me/573162599891?text=Hola%20Cupcake%20Mania!%20Quiero%20hacer%20un%20pedido%20personalizado.', '_blank');
 };
 </script>
 
@@ -153,7 +168,12 @@ const openWhatsApp = () => {
           </v-btn>
         </div>
 
-        <v-row>
+        <v-alert v-if="error" type="error" variant="tonal" class="mb-6">
+          {{ error }}
+        </v-alert>
+        <v-progress-linear v-else-if="loading" indeterminate color="pink-accent-2" class="mb-6"></v-progress-linear>
+
+        <v-row v-if="!loading && !error">
           <v-col
             v-for="product in featuredProducts"
             :key="product.id"

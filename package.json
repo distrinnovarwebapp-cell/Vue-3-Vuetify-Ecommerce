@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:firestore": "node scripts/seedFirestore.mjs"
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",

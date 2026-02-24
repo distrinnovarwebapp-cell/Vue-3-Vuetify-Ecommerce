@@ -1,22 +1,42 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { products, categories } from '../data/mockProducts';
 import { useCartStore } from '../stores/cart';
-import type { Product } from '../types/product';
+import type { Product, Category } from '../types/product';
+import { fetchProducts, fetchCategories } from '../data/firestoreProducts';
 
 const router = useRouter();
 const route = useRoute();
 const cartStore = useCartStore();
 
 // --- Estado ---
+const products = ref<Product[]>([]);
+const categories = ref<Category[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
 const selectedCategories = ref<string[]>([]);
 const priceRange = ref<number[]>([0, 50000]);
 const searchQuery = ref('');
 const filterDrawer = ref(false); // Control para filtros en móvil
 
 // --- Computados ---
-const maxPrice = computed(() => Math.max(...products.map((p) => p.price), 50000));
+const maxPrice = computed(() => Math.max(...products.value.map((p) => p.price), 50000));
+
+onMounted(async () => {
+  try {
+    const [loadedProducts, loadedCategories] = await Promise.all([
+      fetchProducts(),
+      fetchCategories(),
+    ]);
+    products.value = loadedProducts;
+    categories.value = loadedCategories;
+    priceRange.value = [0, maxPrice.value];
+  } catch (err) {
+    error.value = 'No se pudieron cargar los productos.';
+  } finally {
+    loading.value = false;
+  }
+});
 
 watch(() => route.query, (query) => {
   if (query.category) selectedCategories.value = [query.category as string];
@@ -24,7 +44,7 @@ watch(() => route.query, (query) => {
 }, { immediate: true });
 
 const filteredProducts = computed(() => {
-  return products.filter((p) => {
+  return products.value.filter((p) => {
     const matchesCategory = selectedCategories.value.length === 0 || selectedCategories.value.includes(p.category);
     const matchesPrice = p.price >= priceRange.value[0] && p.price <= priceRange.value[1];
     const matchesSearch = !searchQuery.value ||
@@ -36,7 +56,7 @@ const filteredProducts = computed(() => {
 
 // --- Acciones ---
 
-const goToProduct = (id: number) => {
+const goToProduct = (id: string) => {
   router.push({ name: 'ProductDetail', params: { id } });
 };
 
@@ -68,7 +88,12 @@ const addToCart = (product: Product) => {
       </v-btn>
     </div>
 
-    <v-row>
+    <v-alert v-if="error" type="error" variant="tonal" class="mb-6">
+      {{ error }}
+    </v-alert>
+    <v-progress-linear v-else-if="loading" indeterminate color="pink-accent-2" class="mb-6"></v-progress-linear>
+
+    <v-row v-if="!loading && !error">
       <v-col cols="12" md="3" class="d-none d-md-block">
         <v-card variant="flat" class="pa-6 rounded-xl border-sweet sticky-top">
           <div class="d-flex justify-space-between align-center mb-6">

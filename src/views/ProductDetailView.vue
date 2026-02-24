@@ -1,24 +1,39 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { products } from '../data/mockProducts';
 import { useCartStore } from '../stores/cart';
+import { fetchProducts } from '../data/firestoreProducts';
+import type { Product } from '../types/product';
 
 const route = useRoute();
 const router = useRouter();
 const cartStore = useCartStore();
 
+const products = ref<Product[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+
+onMounted(async () => {
+  try {
+    products.value = await fetchProducts();
+  } catch (err) {
+    error.value = 'No se pudieron cargar los productos.';
+  } finally {
+    loading.value = false;
+  }
+});
+
 const quantity = ref(1);
 const snackbar = ref(false);
 
 const product = computed(() => {
-  const id = parseInt(route.params.id as string);
-  return products.find((p) => p.id === id);
+  const id = route.params.id as string;
+  return products.value.find((p) => p.id === id);
 });
 
 const relatedProducts = computed(() => {
   if (!product.value) return [];
-  return products
+  return products.value
     .filter((p) => p.category === product.value?.category && p.id !== product.value?.id)
     .slice(0, 4);
 });
@@ -38,7 +53,7 @@ const addToCart = () => {
   }
 };
 
-const goToProduct = (id: number) => {
+const goToProduct = (id: string) => {
   router.push({ name: 'ProductDetail', params: { id } });
   quantity.value = 1;
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,7 +63,21 @@ const goBack = () => router.back();
 </script>
 
 <template>
-  <v-container v-if="product" class="py-6 py-md-12 px-4 px-md-10 bg-grey-lighten-5">
+  <v-container v-if="loading" class="py-16 text-center">
+    <v-progress-circular indeterminate color="pink-accent-2" size="64"></v-progress-circular>
+    <p class="mt-4 text-grey-darken-1">Cargando producto...</p>
+  </v-container>
+
+  <v-container v-else-if="error" class="py-16 text-center">
+    <v-icon size="72" color="pink-lighten-4">mdi-alert-circle-outline</v-icon>
+    <h2 class="text-h5 font-weight-bold text-brown-darken-4 mt-4">No pudimos cargar este producto</h2>
+    <p class="text-grey-darken-1 mt-2">{{ error }}</p>
+    <v-btn color="pink-accent-2" class="mt-8 rounded-pill" size="large" @click="router.push('/catalog')">
+      Volver al menÃº
+    </v-btn>
+  </v-container>
+
+  <v-container v-else-if="product" class="py-6 py-md-12 px-4 px-md-10 bg-grey-lighten-5">
     <v-btn
       variant="text"
       color="brown-lighten-1"

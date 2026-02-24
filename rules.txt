@@ -1,0 +1,11 @@
+--rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /pedidos/{pedidoId} {
+      allow read: if true; // El cliente puede leer su pedido
+      allow create: if true; // El cliente puede crear
+      allow update: if request.auth != null; // SOLO el admin autenticado puede actualizar el estado
+    }
+  }
+}

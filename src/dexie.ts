@@ -1,12 +1,14 @@
 import Dexie, { type Table } from 'dexie';
 
 export interface PedidoLocal {
+  estado: string;
   id?: number;
   firebaseId?: string;
   cliente: object;
   productos: any[];
   total: number;
   fecha: Date;
+
 }
 
 export class MyDatabase extends Dexie {

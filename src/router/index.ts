@@ -25,6 +25,11 @@ const routes: RouteRecordRaw[] = [
   path: '/historial',
   name: 'OrderHistory',
   component: () => import('../views/OrderHistoryView.vue')
+  },
+  {
+  path: '/pedido/:id',
+  name: 'pedido-detalle',
+  component: () => import('../views/OrderDetailView.vue')
 }
 ];
 

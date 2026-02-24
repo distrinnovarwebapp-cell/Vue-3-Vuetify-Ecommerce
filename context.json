@@ -1,0 +1,36 @@
+{
+  "project_context": {
+    "app_name": "Sistema de Pedidos Dulces",
+    "tech_stack": ["Vue 3", "Vuetify", "Firebase Firestore", "Dexie.js (IndexedDB)"],
+    "architecture": "Sincronización híbrida (Firebase como fuente de verdad + Dexie para persistencia local y offline)"
+  },
+  "data_structures": {
+    "firestore_order": {
+      "collection": "pedidos",
+      "fields": {
+        "cliente": { "nombre": "string", "telefono": "string", "direccion": "string" },
+        "productos": [{ "nombre": "string", "cantidad": "number", "precioUnitario": "number", "subtotal": "number" }],
+        "resumen": { "subtotal": "number", "envio": "number", "total": "number" },
+        "fecha": "serverTimestamp",
+        "estado": ["Recibido", "Preparando", "En Camino", "Entregado","Cancelado"]
+      }
+    },
+    "indexeddb_local": {
+      "store": "pedidos",
+      "fields": {
+        "id": "auto-increment (Dexie)",
+        "firebaseId": "string (doc.id de Firestore)",
+        "estado": "string (sincronizado)",
+        "total": "number"
+      }
+    }
+  },
+  "business_logic": {
+    "checkout_flow": "1. Guardar en Firestore -> 2. Obtener ID -> 3. Enviar correo via Apps Script -> 4. Guardar copia en Dexie.",
+    "sync_strategy": "Al montar TrackingView, usar onSnapshot en Firebase filtrando por ID. Actualizar registro en Dexie en cada cambio de estado.",
+    "admin_panel": "Escucha activa de toda la colección 'pedidos' con capacidad de actualización de campo 'estado'."
+  },
+  "api_endpoints": {
+    "google_apps_script": "https://script.google.com/macros/s/AKfycbzGr084XR4gZGs-lKz4nYd4E_CX3Zg8NdFbdiEHsRDadE5hPAXcWC1SaNtmnNjWgyoHSA/exec"
+  }
+}

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '../stores/cart';
-import { categories } from '../data/mockProducts';
+import { fetchCategories } from '../data/firestoreProducts';
+import type { Category } from '../types/product';
 
 // --- Lógica de Navegación ---
 const router = useRouter();
@@ -11,8 +12,18 @@ const cartStore = useCartStore();
 const searchQuery = ref('');
 const selectedCategory = ref('');
 const drawer = ref(false);
+const categories = ref<Category[]>([]);
+const categoriesLoading = ref(true);
 
 const cartItemsCount = computed(() => cartStore.cartItemsCount);
+
+onMounted(async () => {
+  try {
+    categories.value = await fetchCategories();
+  } finally {
+    categoriesLoading.value = false;
+  }
+});
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
@@ -79,6 +90,7 @@ const goToHistory = () => {
           bg-color="white" 
           rounded="lg"
           prepend-inner-icon="mdi-filter-variant" 
+          :loading="categoriesLoading"
           @update:model-value="handleCategoryChange"
         ></v-select>
       </v-list-item>
@@ -137,6 +149,7 @@ const goToHistory = () => {
         hide-details 
         class="category-dropdown"
         bg-color="pink-lighten-5" 
+        :loading="categoriesLoading"
         @update:model-value="handleCategoryChange"
       ></v-select>
 
